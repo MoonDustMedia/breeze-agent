@@ -64,7 +64,7 @@ def sanitize_name(name: str) -> str:
     return sanitized
 
 
-def swap_roles(state: InterviewState, name: str):
+def swap_roles(state: InterviewState, name: str) -> InterviewState:
     """Convert messages to appropriate roles for the current speaker."""
     converted = []
     for i, message in enumerate(state.messages):

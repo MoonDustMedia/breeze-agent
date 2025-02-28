@@ -1,9 +1,9 @@
 """Node for generating diverse editorial perspectives."""
 
 import random
-from typing import Dict
 
 from langchain_community.retrievers import WikipediaRetriever
+from langchain_core.documents import Document
 from langchain_core.runnables import RunnableConfig
 
 from web_research_graph.configuration import Configuration
@@ -12,20 +12,20 @@ from web_research_graph.state import Perspectives, State
 from web_research_graph.utils import load_chat_model
 
 
-def format_doc(doc, max_length=1000) -> str:
+def format_doc(doc: Document, max_length: int = 1000) -> str:
     """Format a Wikipedia document for use in prompts."""
     related = ", ".join(random.sample(doc.metadata["related_titles"], 10))
     return f"### {doc.metadata['title']}\n- Summary: {doc.page_content[: int(max_length * 2 / 3)]}\n\n- Related: {related[: int(max_length / 3)]}"
 
 
-def format_docs(docs) -> str:
+def format_docs(docs: list[Document]) -> str:
     """Format multiple Wikipedia documents."""
     return "\n\n".join(format_doc(doc) for doc in docs)
 
 
 async def generate_perspectives(
     state: State, config: RunnableConfig
-) -> Dict[str, Perspectives]:
+) -> dict[str, Perspectives]:
     """Generate diverse editorial perspectives based on related topics."""
     configuration = Configuration.from_runnable_config(config)
 
@@ -44,7 +44,7 @@ async def generate_perspectives(
     )
 
     # Filter out any failed retrievals and format the successful ones
-    all_docs = []
+    all_docs: list[Document] = []
     for docs in retrieved_docs:
         if isinstance(docs, BaseException):
             continue

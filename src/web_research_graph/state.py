@@ -141,7 +141,7 @@ class State(InputState, OutputState):
     related_topics: Optional[RelatedTopics] = field(default=None)
     perspectives: Optional[Perspectives] = field(default=None)
     article: Optional[str] = field(default=None)
-    references: Annotated[Optional[dict], field(default=None)] = None
+    references: Annotated[Optional[dict[str, str]], field(default=None)] = None
     topic: TopicValidation = field(default_factory=default_topic_validation)
 
 
@@ -150,7 +150,7 @@ class InterviewState:
     """State for the interview process between editors and experts."""
 
     messages: Annotated[List[AnyMessage], add_messages] = field(default_factory=list)
-    references: Annotated[Optional[dict], field(default=None)] = None
+    references: Annotated[Optional[dict[str, str]], field(default=None)] = None
     editor: Annotated[Optional[Editor], field(default=None)] = None
     editors: List[Editor] = field(default_factory=list)
     current_editor_index: int = field(default=0)
