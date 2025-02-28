@@ -4,16 +4,20 @@ from typing import Optional
 
 from langchain_community.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableConfig
+from langchain_core.vectorstores import VectorStoreRetriever
 from langchain_openai import OpenAIEmbeddings
 
 from web_research_graph.configuration import Configuration
-from web_research_graph.prompts import SECTION_WRITER_PROMPT
+from web_research_graph.prompts import ARTICLE_WRITER_PROMPT, SECTION_WRITER_PROMPT
 from web_research_graph.state import Section, State
 from web_research_graph.utils import dict_to_section, load_chat_model
 
 
-async def create_retriever(references: dict):
+async def create_retriever(
+    references: Optional[dict[str, str]],
+) -> VectorStoreRetriever:
     """Create a retriever from the reference documents."""
     embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
     reference_docs = [
@@ -31,7 +35,7 @@ async def generate_section(
     outline_str: str,
     section_title: str,
     topic: str,
-    retriever,
+    retriever: VectorStoreRetriever,
     config: Optional[RunnableConfig] = None,
 ) -> Section:
     """Generate a single section of the article."""
@@ -53,7 +57,11 @@ async def generate_section(
 
     # Generate the section
     return await chain.ainvoke(
-        {"outline": outline_str, "section": section_title, "docs": formatted_docs}
+        {
+            "outline": outline_str,
+            "section": section_title,
+            "docs": formatted_docs,
+        }
     )
 
 
@@ -63,9 +71,6 @@ async def generate_article(
     """Generate the complete Wikipedia article."""
     if not state.outline:
         raise ValueError("No outline found in state")
-
-    configuration = Configuration.from_runnable_config(config)
-    model = load_chat_model(configuration.long_context_model, max_tokens=4000)
 
     # Convert dictionary outline to Outline object if needed
     current_outline = state.outline
@@ -91,6 +96,16 @@ async def generate_article(
     # Format all sections for final article generation
     draft = "\n\n".join(section.as_str for section in sections)
 
+    # Create the chain for generating the final article
+    configuration = Configuration.from_runnable_config(config)
+    model = load_chat_model(configuration.long_context_model, max_tokens=4000)
+    chain = (ARTICLE_WRITER_PROMPT | model | StrOutputParser()).with_config(config)
+
+    # Generate the final article
+    final_article = await chain.ainvoke(
+        {"draft": draft, "topic": current_outline.page_title}
+    )
+
     # Update state with the generated article
     return State(
         messages=state.messages,
@@ -98,6 +113,6 @@ async def generate_article(
         related_topics=state.related_topics,
         perspectives=state.perspectives,
         is_last_step=True,
-        article=draft,
+        article=final_article,
         references=state.references,
     )
