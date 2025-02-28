@@ -1,5 +1,6 @@
 """Node for generating diverse editorial perspectives."""
 
+import random
 from typing import Dict, List
 
 from langchain_community.retrievers import WikipediaRetriever
@@ -13,8 +14,8 @@ from web_research_graph.prompts import PERSPECTIVES_PROMPT
 
 def format_doc(doc, max_length=1000) -> str:
     """Format a Wikipedia document for use in prompts."""
-    related = "- ".join(doc.metadata["categories"])
-    return f"### {doc.metadata['title']}\n- Summary: {doc.page_content[:int(max_length*2/3)]}\n\n- Related:\n{related[:int(max_length/3)]}"
+    related = ", ".join(random.sample(doc.metadata["related_titles"], 10))
+    return f"### {doc.metadata['title']}\n- Summary: {doc.page_content[:int(max_length*2/3)]}\n\n- Related: {related[:int(max_length/3)]}"
 
 
 def format_docs(docs) -> str:
