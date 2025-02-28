@@ -36,7 +36,7 @@ async def search_for_context(state: InterviewState, config: RunnableConfig) -> I
         references = state.references or {}
         for result in search_results:
             if isinstance(result, dict):
-                references[result.get("url", "unknown")] = result.get("content", "")
+                references[result.get("link", "unknown")] = result.get("snippet", "")
             elif isinstance(result, str):
                 references[f"source_{len(references)}"] = result
             

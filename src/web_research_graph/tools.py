@@ -8,7 +8,7 @@ consider implementing more robust and specialized tools tailored to your needs.
 
 from typing import Any, Callable, List, Optional, cast
 
-from langchain_community.tools.tavily_search import TavilySearchResults
+from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import InjectedToolArg
 from langchain_core.language_models import BaseChatModel
@@ -45,8 +45,8 @@ async def search(
     if len(query) > 350:
         query = await summarize_query(query, model, config)
     
-    wrapped = TavilySearchResults(max_results=configuration.max_search_results)
-    result = await wrapped.ainvoke({"query": query})
+    wrapped = DuckDuckGoSearchAPIWrapper()
+    result = wrapped.results(query, configuration.max_search_results)
     return cast(list[dict[str, Any]], result)
 
 

@@ -23,7 +23,7 @@ class Configuration:
     )
 
     fast_llm_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
-        default="anthropic/claude-3-5-haiku-20241022",
+        default="groq/llama-3.3-70b-versatile",
         metadata={
             "description": "The name of the fast language model to use for simpler tasks. "
             "Should be in the form: provider/model-name."
@@ -31,7 +31,7 @@ class Configuration:
     )
 
     tool_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
-        default="openai/gpt-4o-mini",
+        default="groq/llama-3.3-70b-versatile",
         metadata={
             "description": "The name of the fast language model to use for simpler tasks. "
             "Should be in the form: provider/model-name."
@@ -39,7 +39,7 @@ class Configuration:
     )
 
     long_context_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
-        default="anthropic/claude-3-5-sonnet-20241022",
+        default="groq/llama-3.3-70b-versatile",
         metadata={
             "description": "The name of the language model to use for tasks requiring longer context. "
             "Should be in the form: provider/model-name."
