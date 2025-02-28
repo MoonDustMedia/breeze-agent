@@ -11,6 +11,7 @@ from typing import Any, Callable, List, Optional, cast
 from langchain_community.tools.tavily_search import TavilySearchResults
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import InjectedToolArg
+from langchain_core.language_models import BaseChatModel
 from typing_extensions import Annotated
 from langchain_core.output_parsers import StrOutputParser
 from web_research_graph.utils import load_chat_model
@@ -19,10 +20,10 @@ from web_research_graph.configuration import Configuration
 from web_research_graph.prompts import QUERY_SUMMARIZATION_PROMPT
 
 
-async def summarize_query(query: str, model: Any) -> str:
+async def summarize_query(query: str, model: BaseChatModel, config: RunnableConfig) -> str:
     """Summarize a long query into a shorter, focused version."""
 
-    chain = QUERY_SUMMARIZATION_PROMPT | model | StrOutputParser()
+    chain = (QUERY_SUMMARIZATION_PROMPT | model | StrOutputParser()).with_config(config)
     return await chain.ainvoke({"query": query})
 
 
@@ -42,7 +43,7 @@ async def search(
     model = load_chat_model(configuration.long_context_model)
     # If query is too long, summarize it using the LLM
     if len(query) > 350:
-        query = await summarize_query(query, model)
+        query = await summarize_query(query, model, config)
     
     wrapped = TavilySearchResults(max_results=configuration.max_search_results)
     result = await wrapped.ainvoke({"query": query})

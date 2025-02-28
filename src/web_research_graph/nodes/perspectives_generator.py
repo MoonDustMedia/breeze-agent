@@ -30,7 +30,7 @@ async def generate_perspectives(
     configuration = Configuration.from_runnable_config(config)
 
     # Initialize the Wikipedia retriever
-    wikipedia_retriever = WikipediaRetriever(load_all_available_meta=True, top_k_results=1)
+    wikipedia_retriever = WikipediaRetriever(load_all_available_meta=True, top_k_results=1).with_config(config)
     
     # Get related topics from state
     if not state.related_topics:
@@ -61,15 +61,14 @@ async def generate_perspectives(
 
     # Initialize the model and create the chain
     model = load_chat_model(configuration.fast_llm_model)
-    chain = PERSPECTIVES_PROMPT | model.with_structured_output(Perspectives)
+    chain = (PERSPECTIVES_PROMPT | model.with_structured_output(Perspectives)).with_config(config)
 
     # Generate perspectives
     perspectives = await chain.ainvoke(
         {
             "examples": formatted_docs,
             "topic": last_user_message.content
-        },
-        config
+        }
     )
 
     return {
