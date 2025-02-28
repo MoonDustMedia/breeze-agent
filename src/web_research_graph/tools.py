@@ -42,7 +42,7 @@ async def search(
     configuration = Configuration.from_runnable_config(config)
     model = load_chat_model(configuration.long_context_model)
     # If query is too long, summarize it using the LLM
-    if len(query) > 350:
+    if len(query) > 40:
         query = await summarize_query(query, model, config)
     
     wrapped = DuckDuckGoSearchAPIWrapper()
