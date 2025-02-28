@@ -14,7 +14,7 @@ from web_research_graph.prompts import PERSPECTIVES_PROMPT
 def format_doc(doc, max_length=1000) -> str:
     """Format a Wikipedia document for use in prompts."""
     related = "- ".join(doc.metadata["categories"])
-    return f"### {doc.metadata['title']}\n\nSummary: {doc.page_content}\n\nRelated\n{related}"[:max_length]
+    return f"### {doc.metadata['title']}\n- Summary: {doc.page_content[:int(max_length*2/3)]}\n\n- Related:\n{related[:int(max_length/3)]}"
 
 
 def format_docs(docs) -> str:
