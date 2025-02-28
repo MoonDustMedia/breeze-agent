@@ -2,8 +2,6 @@
 
 from typing import Dict
 
-from langchain_core.messages import AIMessage
-from langchain_core.prompts import ChatPromptTemplate
 from langchain_core.runnables import RunnableConfig
 
 from web_research_graph.configuration import Configuration
