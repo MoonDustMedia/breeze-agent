@@ -9,20 +9,21 @@ consider implementing more robust and specialized tools tailored to your needs.
 from typing import Any, Callable, List, Optional, cast
 
 from langchain_community.utilities.duckduckgo_search import DuckDuckGoSearchAPIWrapper
+from langchain_core.language_models import BaseChatModel
+from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableConfig
 from langchain_core.tools import InjectedToolArg
-from langchain_core.language_models import BaseChatModel
 from typing_extensions import Annotated
-from langchain_core.output_parsers import StrOutputParser
-from web_research_graph.utils import load_chat_model
 
 from web_research_graph.configuration import Configuration
 from web_research_graph.prompts import QUERY_SUMMARIZATION_PROMPT
+from web_research_graph.utils import load_chat_model
 
 
-async def summarize_query(query: str, model: BaseChatModel, config: RunnableConfig) -> str:
+async def summarize_query(
+    query: str, model: BaseChatModel, config: RunnableConfig
+) -> str:
     """Summarize a long query into a shorter, focused version."""
-
     chain = (QUERY_SUMMARIZATION_PROMPT | model | StrOutputParser()).with_config(config)
     return await chain.ainvoke({"query": query})
 
@@ -44,7 +45,7 @@ async def search(
     # If query is too long, summarize it using the LLM
     if len(query) > 40:
         query = await summarize_query(query, model, config)
-    
+
     wrapped = DuckDuckGoSearchAPIWrapper()
     result = wrapped.results(query, configuration.max_search_results)
     return cast(list[dict[str, Any]], result)

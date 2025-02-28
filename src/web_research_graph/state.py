@@ -15,7 +15,7 @@ from typing_extensions import Annotated
 @dataclass
 class Editor:
     """Represents a Wikipedia editor with specific expertise."""
-    
+
     affiliation: str
     name: str
     role: str
@@ -30,13 +30,13 @@ class Editor:
 @dataclass
 class Perspectives:
     """Represents a group of editors with different perspectives."""
-    
+
     editors: List[Editor] = field(default_factory=list)
 
 
 class RelatedTopics(BaseModel):
     """Represents related topics for research."""
-    
+
     topics: List[str] = Field(
         description="List of related topics that are relevant to the main research subject"
     )
@@ -44,13 +44,9 @@ class RelatedTopics(BaseModel):
 
 class Subsection(BaseModel):
     """Represents a subsection in a Wikipedia article."""
-    
-    subsection_title: str = Field(
-        description="The title of the subsection"
-    )
-    description: str = Field(
-        description="The detailed content of the subsection"
-    )
+
+    subsection_title: str = Field(description="The title of the subsection")
+    description: str = Field(description="The detailed content of the subsection")
 
     @property
     def as_str(self) -> str:
@@ -60,19 +56,15 @@ class Subsection(BaseModel):
 
 class Section(BaseModel):
     """Represents a section in a Wikipedia article."""
-    
-    section_title: str = Field(
-        description="The title of the section"
-    )
-    description: str = Field(
-        description="The main content/summary of the section"
-    )
+
+    section_title: str = Field(description="The title of the section")
+    description: str = Field(description="The main content/summary of the section")
     subsections: List[Subsection] = Field(
         description="List of subsections within this section"
     )
     citations: List[str] = Field(
         default_factory=list,
-        description="List of citations supporting the section content"
+        description="List of citations supporting the section content",
     )
 
     @property
@@ -81,7 +73,9 @@ class Section(BaseModel):
         subsections = "\n\n".join(
             subsection.as_str for subsection in self.subsections or []
         )
-        citations = "\n".join([f"[{i+1}] {cit}" for i, cit in enumerate(self.citations)])
+        citations = "\n".join(
+            [f"[{i + 1}] {cit}" for i, cit in enumerate(self.citations)]
+        )
         return (
             f"## {self.section_title}\n\n{self.description}\n\n{subsections}".strip()
             + f"\n\n{citations}".strip()
@@ -91,9 +85,7 @@ class Section(BaseModel):
 class Outline(BaseModel):
     """Represents a complete Wikipedia-style outline."""
 
-    page_title: str = Field(
-        description="The main title of the Wikipedia article"
-    )
+    page_title: str = Field(description="The main title of the Wikipedia article")
     sections: List[Section] = Field(
         description="List of sections that make up the article"
     )
@@ -109,7 +101,10 @@ class Outline(BaseModel):
 class InputState:
     """Defines the input state for the agent."""
 
-    messages: Annotated[Sequence[AnyMessage], add_messages] = field(default_factory=list)
+    messages: Annotated[Sequence[AnyMessage], add_messages] = field(
+        default_factory=list
+    )
+
 
 @dataclass
 class OutputState:
@@ -117,9 +112,10 @@ class OutputState:
 
     article: Optional[str] = field(default=None)
 
+
 class TopicValidation(BaseModel):
     """Structured output for topic validation."""
-    
+
     is_valid: bool = Field(
         description="Indicates whether the topic is valid for article generation"
     )
@@ -130,9 +126,11 @@ class TopicValidation(BaseModel):
         description="Feedback message about the topic validation result"
     )
 
+
 def default_topic_validation() -> TopicValidation:
     """Create a default TopicValidation instance."""
     return TopicValidation(is_valid=False, topic=None, message=None)
+
 
 @dataclass
 class State(InputState, OutputState):
@@ -146,10 +144,11 @@ class State(InputState, OutputState):
     references: Annotated[Optional[dict], field(default=None)] = None
     topic: TopicValidation = field(default_factory=default_topic_validation)
 
+
 @dataclass
 class InterviewState:
     """State for the interview process between editors and experts."""
-    
+
     messages: Annotated[List[AnyMessage], add_messages] = field(default_factory=list)
     references: Annotated[Optional[dict], field(default=None)] = None
     editor: Annotated[Optional[Editor], field(default=None)] = None

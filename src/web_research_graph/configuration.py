@@ -38,15 +38,15 @@ class Configuration:
         },
     )
 
-    long_context_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = field(
-        default="groq/llama-3.3-70b-versatile",
-        metadata={
-            "description": "The name of the language model to use for tasks requiring longer context. "
-            "Should be in the form: provider/model-name."
-        },
+    long_context_model: Annotated[str, {"__template_metadata__": {"kind": "llm"}}] = (
+        field(
+            default="groq/llama-3.3-70b-versatile",
+            metadata={
+                "description": "The name of the language model to use for tasks requiring longer context. "
+                "Should be in the form: provider/model-name."
+            },
+        )
     )
-
-    
 
     max_search_results: int = field(
         default=4,

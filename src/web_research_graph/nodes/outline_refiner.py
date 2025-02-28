@@ -1,42 +1,46 @@
 """Node for refining the outline based on interview results."""
 
 from typing import Optional
+
 from langchain_core.runnables import RunnableConfig
 
 from web_research_graph.configuration import Configuration
-from web_research_graph.state import State, Outline
-from web_research_graph.utils import load_chat_model, get_message_text
 from web_research_graph.prompts import REFINE_OUTLINE_PROMPT
+from web_research_graph.state import Outline, State
+from web_research_graph.utils import get_message_text, load_chat_model
+
 
 async def refine_outline(
-    state: State, 
-    config: Optional[RunnableConfig] = None
+    state: State, config: Optional[RunnableConfig] = None
 ) -> State:
     """Refine the outline based on interview results."""
     configuration = Configuration.from_runnable_config(config)
     model = load_chat_model(configuration.tool_model)
-    
+
     if not state.outline:
         raise ValueError("No initial outline found in state")
-   
+
     current_outline = state.outline
-        
+
     # Format conversations from the state's messages
     conversations = "\n\n".join(
-        f"### {m.name}\n\n{get_message_text(m)}" 
-        for m in state.messages
+        f"### {m.name}\n\n{get_message_text(m)}" for m in state.messages
     )
-    
+
     # Create the chain with structured output
-    chain = (REFINE_OUTLINE_PROMPT | model.with_structured_output(Outline)).with_config(config)
-    
+    chain = (REFINE_OUTLINE_PROMPT | model.with_structured_output(Outline)).with_config(
+        config
+    )
+
     # Generate refined outline with explicit structure validation
-    refined_outline = await chain.ainvoke({
-        "topic": current_outline.page_title,
-        "old_outline": current_outline.as_str,
-        "conversations": conversations,
-    })
-    
+    refined_outline = await chain.ainvoke(
+        {
+            "topic": current_outline.page_title,
+            "old_outline": current_outline.as_str,
+            "conversations": conversations,
+        }
+    )
+
     # Ensure we maintain the structure
     if not refined_outline.sections:
         # If no sections, copy the sections from the current outline
@@ -48,12 +52,12 @@ async def refine_outline(
         # Update existing sections with refined ones, keeping any that weren't refined
         existing_sections.update(refined_sections)
         refined_outline.sections = list(existing_sections.values())
-    
+
     # Return updated state with new outline
     return State(
         messages=state.messages,
         outline=refined_outline,
         related_topics=state.related_topics,
         perspectives=state.perspectives,
-        is_last_step=state.is_last_step
-    ) 
+        is_last_step=state.is_last_step,
+    )

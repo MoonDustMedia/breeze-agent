@@ -5,9 +5,10 @@ from typing import Dict
 from langchain_core.runnables import RunnableConfig
 
 from web_research_graph.configuration import Configuration
-from web_research_graph.state import State, RelatedTopics
-from web_research_graph.utils import load_chat_model
 from web_research_graph.prompts import RELATED_TOPICS_PROMPT
+from web_research_graph.state import RelatedTopics, State
+from web_research_graph.utils import load_chat_model
+
 
 async def expand_topics(
     state: State, config: RunnableConfig
@@ -27,11 +28,13 @@ async def expand_topics(
         raise ValueError("No user message found in state")
 
     # Create the chain for topic expansion with structured output
-    chain = (RELATED_TOPICS_PROMPT | model.with_structured_output(RelatedTopics)).with_config(config)
+    chain = (
+        RELATED_TOPICS_PROMPT | model.with_structured_output(RelatedTopics)
+    ).with_config(config)
 
     # Generate related topics
     related_topics = await chain.ainvoke({"topic": last_user_message.content})
 
     return {
         "related_topics": related_topics,
-    } 
+    }

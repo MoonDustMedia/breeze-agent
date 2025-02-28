@@ -1,21 +1,21 @@
 """Node for generating diverse editorial perspectives."""
 
 import random
-from typing import Dict, List
+from typing import Dict
 
 from langchain_community.retrievers import WikipediaRetriever
 from langchain_core.runnables import RunnableConfig
 
 from web_research_graph.configuration import Configuration
-from web_research_graph.state import State, Perspectives
-from web_research_graph.utils import load_chat_model
 from web_research_graph.prompts import PERSPECTIVES_PROMPT
+from web_research_graph.state import Perspectives, State
+from web_research_graph.utils import load_chat_model
 
 
 def format_doc(doc, max_length=1000) -> str:
     """Format a Wikipedia document for use in prompts."""
     related = ", ".join(random.sample(doc.metadata["related_titles"], 10))
-    return f"### {doc.metadata['title']}\n- Summary: {doc.page_content[:int(max_length*2/3)]}\n\n- Related: {related[:int(max_length/3)]}"
+    return f"### {doc.metadata['title']}\n- Summary: {doc.page_content[: int(max_length * 2 / 3)]}\n\n- Related: {related[: int(max_length / 3)]}"
 
 
 def format_docs(docs) -> str:
@@ -27,31 +27,31 @@ async def generate_perspectives(
     state: State, config: RunnableConfig
 ) -> Dict[str, Perspectives]:
     """Generate diverse editorial perspectives based on related topics."""
-
     configuration = Configuration.from_runnable_config(config)
 
     # Initialize the Wikipedia retriever
-    wikipedia_retriever = WikipediaRetriever(load_all_available_meta=True, top_k_results=1).with_config(config)
-    
+    wikipedia_retriever = WikipediaRetriever(
+        load_all_available_meta=True, top_k_results=1
+    ).with_config(config)
+
     # Get related topics from state
     if not state.related_topics:
         raise ValueError("No related topics found in state")
-    
+
     # Retrieve Wikipedia documents for each topic
     retrieved_docs = await wikipedia_retriever.abatch(
-        state.related_topics.topics,
-        return_exceptions=True
+        state.related_topics.topics, return_exceptions=True
     )
-    
+
     # Filter out any failed retrievals and format the successful ones
     all_docs = []
     for docs in retrieved_docs:
         if isinstance(docs, BaseException):
             continue
         all_docs.extend(docs)
-    
+
     formatted_docs = format_docs(all_docs)
-    
+
     # Get the original topic from messages
     last_user_message = next(
         (msg for msg in reversed(state.messages) if msg.type == "human"),
@@ -62,11 +62,13 @@ async def generate_perspectives(
 
     # Initialize the model and create the chain
     model = load_chat_model(configuration.fast_llm_model)
-    chain = (PERSPECTIVES_PROMPT | model.with_structured_output(Perspectives)).with_config(config)
+    chain = (
+        PERSPECTIVES_PROMPT | model.with_structured_output(Perspectives)
+    ).with_config(config)
 
     # Generate perspectives
-    perspectives = await chain.ainvoke({"examples": formatted_docs, "topic": last_user_message.content})
+    perspectives = await chain.ainvoke(
+        {"examples": formatted_docs, "topic": last_user_message.content}
+    )
 
-    return {
-        "perspectives": perspectives
-    } 
+    return {"perspectives": perspectives}

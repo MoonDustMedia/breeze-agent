@@ -1,15 +1,14 @@
 """Utility & helper functions."""
 
-from typing import Dict, Any, Optional
+import re
+from typing import Any, Dict, Optional
+
 from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import BaseMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
 
-from web_research_graph.state import Outline, Section, Subsection
-import re
-from langchain_core.messages import AIMessage, HumanMessage
+from web_research_graph.state import InterviewState, Section, Subsection
 
-from web_research_graph.state import InterviewState
 
 def get_message_text(msg: BaseMessage) -> str:
     """Get the text content of a message."""
@@ -23,7 +22,9 @@ def get_message_text(msg: BaseMessage) -> str:
         return "".join(txts).strip()
 
 
-def load_chat_model(fully_specified_name: str, max_tokens: Optional[int] = None) -> BaseChatModel:
+def load_chat_model(
+    fully_specified_name: str, max_tokens: Optional[int] = None
+) -> BaseChatModel:
     """Load a chat model from a fully specified name.
 
     Args:
@@ -36,43 +37,46 @@ def load_chat_model(fully_specified_name: str, max_tokens: Optional[int] = None)
         kwargs["max_tokens"] = max_tokens
     return init_chat_model(model, model_provider=provider, **kwargs)
 
+
 def dict_to_section(section_dict: Dict[str, Any]) -> Section:
     """Convert a dictionary to a Section object."""
     subsections = []
     for subsection_data in section_dict.get("subsections", []) or []:
-        subsections.append(Subsection(
-            subsection_title=subsection_data["subsection_title"],
-            description=subsection_data["description"]
-        ))
-    
+        subsections.append(
+            Subsection(
+                subsection_title=subsection_data["subsection_title"],
+                description=subsection_data["description"],
+            )
+        )
+
     return Section(
         section_title=section_dict["section_title"],
         description=section_dict["description"],
         subsections=subsections,
-        citations=section_dict.get("citations", [])
+        citations=section_dict.get("citations", []),
     )
+
 
 def sanitize_name(name: str) -> str:
     """Convert a name to a valid format for the API."""
     # Replace spaces and special chars with underscores, keep alphanumeric
-    sanitized = re.sub(r'[^a-zA-Z0-9_-]', '_', name)
+    sanitized = re.sub(r"[^a-zA-Z0-9_-]", "_", name)
     return sanitized
+
 
 def swap_roles(state: InterviewState, name: str):
     """Convert messages to appropriate roles for the current speaker."""
-    
     converted = []
     for i, message in enumerate(state.messages):
-        
         if isinstance(message, AIMessage) and message.name != name:
             message = HumanMessage(**message.dict(exclude={"type"}))
-        
+
         converted.append(message)
-    
+
     return InterviewState(
-        messages=converted, 
+        messages=converted,
         editor=state.editor,
         references=state.references,
         editors=state.editors,
-        current_editor_index=state.current_editor_index
+        current_editor_index=state.current_editor_index,
     )

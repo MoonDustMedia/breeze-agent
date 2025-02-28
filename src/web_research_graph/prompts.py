@@ -6,10 +6,11 @@ SYSTEM_PROMPT = """You are a helpful AI assistant.
 
 System time: {system_time}"""
 
-TOPIC_VALIDATOR_PROMPT = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        """You are a helpful assistant whose job is to ensure the user provides a clear topic for research.
+TOPIC_VALIDATOR_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are a helpful assistant whose job is to ensure the user provides a clear topic for research.
         Analyze the user's input and determine if it contains a clear research topic.
         
         Example valid topics:
@@ -22,10 +23,11 @@ TOPIC_VALIDATOR_PROMPT = ChatPromptTemplate.from_messages([
         - topic: the extracted topic if valid, null otherwise
         - message: a helpful message if the input is invalid, null otherwise
         
-        For invalid inputs or small talk, provide a polite message asking for a specific topic."""
-    ),
-    ("user", "{input}"),
-])
+        For invalid inputs or small talk, provide a polite message asking for a specific topic.""",
+        ),
+        ("user", "{input}"),
+    ]
+)
 
 RELATED_TOPICS_PROMPT = ChatPromptTemplate.from_template(
     """I'm writing a Wikipedia page for a topic mentioned below. Please identify and recommend some Wikipedia pages on closely related subjects. I'm looking for examples that provide insights into interesting aspects commonly associated with this topic, or examples that help me understand the typical content and structure included in Wikipedia pages for similar topics.
@@ -71,25 +73,28 @@ Stay true to your specific perspective:
     ]
 )
 
-INTERVIEW_ANSWER_PROMPT = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        """You are an expert who can use information effectively. You are chatting with a Wikipedia writer who wants\
+INTERVIEW_ANSWER_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert who can use information effectively. You are chatting with a Wikipedia writer who wants\
  to write a Wikipedia page on the topic you know. Use the provided references to form your response.
 
 Make your response as informative as possible and make sure every sentence is supported by the gathered information.
 Each response must be backed up by a citation from a reliable source, formatted as a footnote, reproducing the URLS after your response.
 
 References:
-{references}"""
-    ),
-    MessagesPlaceholder(variable_name="messages", optional=True),
-])
+{references}""",
+        ),
+        MessagesPlaceholder(variable_name="messages", optional=True),
+    ]
+)
 
-REFINE_OUTLINE_PROMPT = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        """You are a Wikipedia writer. You have gathered information from experts and search engines. Now, you are refining the outline of the Wikipedia page. \
+REFINE_OUTLINE_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are a Wikipedia writer. You have gathered information from experts and search engines. Now, you are refining the outline of the Wikipedia page. \
 You need to make sure that the outline is comprehensive and specific. \
 Topic you are writing about: {topic} 
 
@@ -108,26 +113,33 @@ Use the old outline as a base, enhancing it with new information from the conver
 Old outline:
 
 {old_outline}""",
-    ),
-    (
-        "user",
-        "Refine the outline based on your conversations with subject-matter experts:\n\nConversations:\n\n{conversations}\n\nProvide the refined outline following the required structure.",
-    ),
-])
+        ),
+        (
+            "user",
+            "Refine the outline based on your conversations with subject-matter experts:\n\nConversations:\n\n{conversations}\n\nProvide the refined outline following the required structure.",
+        ),
+    ]
+)
 
-SECTION_WRITER_PROMPT = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        """You are an expert Wikipedia writer. Complete your assigned WikiSection from the following outline:\n\n
+SECTION_WRITER_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert Wikipedia writer. Complete your assigned WikiSection from the following outline:\n\n
 {outline}\n\nCite your sources, using the following references:\n\n<Documents>\n{docs}\n</Documents>""",
-    ),
-    ("user", "Write the full WikiSection for the {section} section. Include both the section description and any subsection descriptions."),
-])
+        ),
+        (
+            "user",
+            "Write the full WikiSection for the {section} section. Include both the section description and any subsection descriptions.",
+        ),
+    ]
+)
 
-ARTICLE_WRITER_PROMPT = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        """You are an expert Wikipedia author. Write the complete wiki article on {topic} using the following section drafts:\n\n
+ARTICLE_WRITER_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are an expert Wikipedia author. Write the complete wiki article on {topic} using the following section drafts:\n\n
 {draft}\n\n
 CRITICAL REQUIREMENTS:
 1. You MUST write the COMPLETE article including ALL sections from the drafts
@@ -140,18 +152,20 @@ CRITICAL REQUIREMENTS:
 8. Maintain the comprehensive nature of each section while creating a unified whole
 
 Strictly follow Wikipedia format guidelines.""",
-    ),
-    (
-        "user",
-        'Write the COMPLETE Wiki article using markdown format. Include ALL sections. Organize citations using footnotes like "[1]",'
-        " avoiding duplicates in the footer. Include URLs in the footer.",
-    ),
-])
+        ),
+        (
+            "user",
+            'Write the COMPLETE Wiki article using markdown format. Include ALL sections. Organize citations using footnotes like "[1]",'
+            " avoiding duplicates in the footer. Include URLs in the footer.",
+        ),
+    ]
+)
 
-OUTLINE_PROMPT = ChatPromptTemplate.from_messages([
-    (
-        "system",
-        """You are a Wikipedia writer. Create a comprehensive outline for a Wikipedia page about the given topic.
+OUTLINE_PROMPT = ChatPromptTemplate.from_messages(
+    [
+        (
+            "system",
+            """You are a Wikipedia writer. Create a comprehensive outline for a Wikipedia page about the given topic.
 
 Your output must follow this structure:
 - page_title: The main topic title
@@ -163,10 +177,11 @@ Your output must follow this structure:
     - description: Detailed description of the subsection content
   - citations: A list of citation URLs (can be empty for initial outline)
 
-Make sure to include at least 3-5 main sections with relevant subsections."""
-    ),
-    ("user", "Create a Wikipedia outline for: {topic}"),
-])
+Make sure to include at least 3-5 main sections with relevant subsections.""",
+        ),
+        ("user", "Create a Wikipedia outline for: {topic}"),
+    ]
+)
 
 QUERY_SUMMARIZATION_PROMPT = ChatPromptTemplate.from_template(
     """Given a long search query, create a shorter, focused version that captures the main search intent in under 350 characters.

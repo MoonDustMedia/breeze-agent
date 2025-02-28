@@ -1,10 +1,14 @@
 """Define the answer generation workflow graph."""
 
-from langgraph.graph import StateGraph, START, END
+from langgraph.graph import END, START, StateGraph
 
+from web_research_graph.interviews_graph.answers_graph.nodes.generate import (
+    generate_expert_answer,
+)
+from web_research_graph.interviews_graph.answers_graph.nodes.search import (
+    search_for_context,
+)
 from web_research_graph.state import InterviewState
-from web_research_graph.interviews_graph.answers_graph.nodes.search import search_for_context
-from web_research_graph.interviews_graph.answers_graph.nodes.generate import generate_expert_answer
 
 builder = StateGraph(InterviewState)
 
