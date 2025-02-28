@@ -15,7 +15,7 @@ async def initialize_interview(state: State, config: RunnableConfig) -> Intervie
         raise ValueError("No perspectives found in state")
 
     perspectives = state.perspectives
-    editors = perspectives.editors or []
+    editors = perspectives.get("editors", [])
 
     if not editors:
         raise ValueError("No editors found in perspectives")
