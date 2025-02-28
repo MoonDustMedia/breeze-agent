@@ -28,17 +28,14 @@ async def refine_outline(
     )
     
     # Create the chain with structured output
-    chain = REFINE_OUTLINE_PROMPT | model.with_structured_output(Outline)
+    chain = (REFINE_OUTLINE_PROMPT | model.with_structured_output(Outline)).with_config(config)
     
     # Generate refined outline with explicit structure validation
-    refined_outline = await chain.ainvoke(
-        {
-            "topic": current_outline.page_title,
-            "old_outline": current_outline.as_str,
-            "conversations": conversations,
-        },
-        config
-    )
+    refined_outline = await chain.ainvoke({
+        "topic": current_outline.page_title,
+        "old_outline": current_outline.as_str,
+        "conversations": conversations,
+    })
     
     # Ensure we maintain the structure
     if not refined_outline.sections:

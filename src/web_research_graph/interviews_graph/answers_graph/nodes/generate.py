@@ -28,16 +28,10 @@ async def generate_expert_answer(state: InterviewState, config: RunnableConfig) 
         )
     
     # Create the chain
-    chain = INTERVIEW_ANSWER_PROMPT | model
+    chain = (INTERVIEW_ANSWER_PROMPT | model).with_config(config)
     
     # Generate answer
-    result = await chain.ainvoke(
-        {
-            "messages": state.messages, 
-            "references": references_text
-        },
-        config
-    )
+    result = await chain.ainvoke({"messages": state.messages, "references": references_text})
     
     content = result.content if hasattr(result, 'content') else str(result)
     

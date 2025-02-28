@@ -21,10 +21,10 @@ async def generate_outline(
         raise ValueError("No valid topic found in state")
 
     # Create the chain for outline generation with structured output
-    chain = OUTLINE_PROMPT | model.with_structured_output(Outline)
+    chain = (OUTLINE_PROMPT | model.with_structured_output(Outline)).with_config(config)
 
     # Generate the outline using the validated topic
-    response = await chain.ainvoke({"topic": state.topic.topic}, config)
+    response = await chain.ainvoke({"topic": state.topic.topic})
 
     return {
         "outline": response,

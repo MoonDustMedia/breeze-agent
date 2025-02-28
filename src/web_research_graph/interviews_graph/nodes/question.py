@@ -21,12 +21,9 @@ async def generate_question(state: InterviewState, config: RunnableConfig):
     editor_name = sanitize_name(editor.name)
     swapped = swap_roles(state, editor_name)
     
-    chain = INTERVIEW_QUESTION_PROMPT | model
+    chain = (INTERVIEW_QUESTION_PROMPT | model).with_config(config)
     
-    result = await chain.ainvoke(
-        {"messages": swapped.messages, "persona": editor.persona},
-        config
-    )
+    result = await chain.ainvoke({"messages": swapped.messages, "persona": editor.persona})
     
     content = result.content if hasattr(result, 'content') else str(result)
     

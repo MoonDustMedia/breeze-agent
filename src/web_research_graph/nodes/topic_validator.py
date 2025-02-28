@@ -22,11 +22,8 @@ async def validate_topic(state: State, config: RunnableConfig) -> Dict:
         raise ValueError("No user message found in state")
     
     # Validate the topic using structured output
-    chain = TOPIC_VALIDATOR_PROMPT | model.with_structured_output(TopicValidation)
-    response = await chain.ainvoke(
-        {"input": last_user_message.content},
-        config=config,
-    )
+    chain = (TOPIC_VALIDATOR_PROMPT | model.with_structured_output(TopicValidation)).with_config(config)
+    response = await chain.ainvoke({"input": last_user_message.content})
 
     message = []
     if not response.is_valid:

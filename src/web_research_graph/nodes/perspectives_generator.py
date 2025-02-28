@@ -64,12 +64,7 @@ async def generate_perspectives(
     chain = (PERSPECTIVES_PROMPT | model.with_structured_output(Perspectives)).with_config(config)
 
     # Generate perspectives
-    perspectives = await chain.ainvoke(
-        {
-            "examples": formatted_docs,
-            "topic": last_user_message.content
-        }
-    )
+    perspectives = await chain.ainvoke({"examples": formatted_docs, "topic": last_user_message.content})
 
     return {
         "perspectives": perspectives

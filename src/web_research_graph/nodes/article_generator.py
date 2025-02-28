@@ -44,17 +44,11 @@ async def generate_section(
     
     # Create the chain
     model = load_chat_model(configuration.long_context_model, max_tokens=2000)
-    chain = SECTION_WRITER_PROMPT | model.with_structured_output(Section)
+    chain = (SECTION_WRITER_PROMPT | model.with_structured_output(Section)).with_config(config)
     
     # Generate the section
-    return await chain.ainvoke(
-        {
-            "outline": outline_str,
-            "section": section_title,
-            "docs": formatted_docs,
-        },
-        config
-    )
+    return await chain.ainvoke({"outline": outline_str,"section": section_title,"docs": formatted_docs})
+
 
 async def generate_article(state: State, config: Optional[RunnableConfig] = None) -> State:
     """Generate the complete Wikipedia article."""
