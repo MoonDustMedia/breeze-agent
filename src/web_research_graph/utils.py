@@ -7,7 +7,7 @@ from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import AIMessage, AnyMessage, BaseMessage, HumanMessage
 
-from web_research_graph.state import InterviewState, Section, Subsection
+from web_research_graph.state import Section, Subsection
 
 
 def get_message_text(msg: BaseMessage) -> str:
@@ -64,10 +64,10 @@ def sanitize_name(name: str) -> str:
     return sanitized
 
 
-def swap_roles(state: InterviewState, name: str) -> list[AnyMessage]:
+def swap_roles(messages: list[AnyMessage], name: str) -> list[AnyMessage]:
     """Convert messages to appropriate roles for the current speaker."""
     swapped = []
-    for i, message in enumerate(state.messages):
+    for i, message in enumerate(messages):
         if isinstance(message, AIMessage) and message.name != name:
             message = HumanMessage(**message.dict(exclude={"type"}))
         swapped.append(message)

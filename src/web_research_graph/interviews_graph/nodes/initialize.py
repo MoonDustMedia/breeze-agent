@@ -1,6 +1,6 @@
 """Node for initializing the interview process."""
 
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, AnyMessage
 from langchain_core.runnables import RunnableConfig
 
 from web_research_graph.state import Editor, InterviewState
@@ -25,14 +25,18 @@ def initialize_interview(
     # Convert editors to proper Editor objects
     editors_list = [Editor(**editor) for editor in editors]
 
-    # Start with the first editor
+    # first expert response
     initial_message = AIMessage(
-        content=f"So you said you were writing an article on {state.outline.page_title if state.outline else 'this topic'}?",
+        content=f"So you said you were writing an article on {state.topic.topic}?",
         name=EXPERT_NAME,
     )
 
+    # alloc interviews history
+    interviews: list[list[AnyMessage]] = [[] for _ in editors_list]
+    interviews[0].append(initial_message)
+
     return {
-        "messages": initial_message,
         "editors": editors_list,
         "current_editor_index": 0,
+        "interviews": interviews,
     }  # type: ignore

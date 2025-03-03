@@ -1,6 +1,6 @@
 """Define the answer generation workflow graph."""
 
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import StateGraph
 
 from web_research_graph.interviews_graph.answers_graph.nodes.generate import (
     generate_expert_answer,
@@ -17,9 +17,9 @@ builder.add_node("search_context", search_for_context)
 builder.add_node("generate_answer", generate_expert_answer)
 
 # Add edges
-builder.add_edge(START, "search_context")
+builder.set_entry_point("search_context")
 builder.add_edge("search_context", "generate_answer")
-builder.add_edge("generate_answer", END)
+builder.set_finish_point("generate_answer")
 
 answer_graph = builder.compile()
 answer_graph.name = "Answer Generator"

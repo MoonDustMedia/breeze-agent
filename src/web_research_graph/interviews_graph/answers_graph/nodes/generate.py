@@ -21,6 +21,7 @@ async def generate_expert_answer(
     editor = state.editors[state.current_editor_index]
     if editor is None:
         raise ValueError("Editor not found in state")
+    messages = state.interviews[state.current_editor_index]
 
     # Format references for the prompt
     references_text = ""
@@ -35,7 +36,7 @@ async def generate_expert_answer(
 
     # Generate answer
     result = await chain.ainvoke(
-        {"messages": state.messages, "references": references_text}
+        {"messages": messages, "references": references_text}
     )
 
     content = result.content if hasattr(result, "content") else str(result)

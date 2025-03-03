@@ -18,8 +18,9 @@ async def search_for_context(
     if editor is None:
         raise ValueError("Editor not found in state")
 
+    messages = state.interviews[state.current_editor_index]
     # Swap roles to get the correct perspective
-    swapped_messages = swap_roles(state, EXPERT_NAME)
+    swapped_messages = swap_roles(messages, EXPERT_NAME)
 
     # Get the last question (now as HumanMessage after swap)
     last_question = next(
@@ -41,7 +42,6 @@ async def search_for_context(
                 references[result.get("link", "unknown")] = result.get("snippet", "")
             elif isinstance(result, str):
                 references[f"source_{len(references)}"] = result
-
         return {
             "references": references,
         }  # type: ignore

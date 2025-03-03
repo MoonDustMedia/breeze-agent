@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 from dataclasses import dataclass, field
-from typing import List, Optional, Sequence
+from typing import Optional
 
 from langchain_core.messages import AnyMessage
 from langgraph.graph import add_messages
@@ -31,13 +31,13 @@ class Editor:
 class Perspectives:
     """Represents a group of editors with different perspectives."""
 
-    editors: List[Editor] = field(default_factory=list)
+    editors: list[Editor] = field(default_factory=list)
 
 
 class RelatedTopics(BaseModel):
     """Represents related topics for research."""
 
-    topics: List[str] = Field(
+    topics: list[str] = Field(
         description="List of related topics that are relevant to the main research subject"
     )
 
@@ -59,10 +59,10 @@ class Section(BaseModel):
 
     section_title: str = Field(description="The title of the section")
     description: str = Field(description="The main content/summary of the section")
-    subsections: List[Subsection] = Field(
+    subsections: list[Subsection] = Field(
         description="List of subsections within this section"
     )
-    citations: List[str] = Field(
+    citations: list[str] = Field(
         default_factory=list,
         description="List of citations supporting the section content",
     )
@@ -86,7 +86,7 @@ class Outline(BaseModel):
     """Represents a complete Wikipedia-style outline."""
 
     page_title: str = Field(description="The main title of the Wikipedia article")
-    sections: List[Section] = Field(
+    sections: list[Section] = Field(
         description="List of sections that make up the article"
     )
 
@@ -139,18 +139,21 @@ class State(InputState, OutputState):
     is_last_step: IsLastStep = field(default=False)
     outline: Optional[Outline] = field(default=None)
     perspectives: Optional[Perspectives] = field(default=None)
-    references: Optional[dict[str, str]] = Field(default=None)
+    references: dict[str, str] = field(default_factory=dict)
     article: Optional[str] = field(default=None)
-    interviews: Optional[dict[str, List[AnyMessage]]] = field(default=None)
-    messages: Annotated[Sequence[AnyMessage], add_messages] = field(
+    interviews: list[Annotated[list[AnyMessage], add_messages]] = field(
         default_factory=list
     )
+    messages: Annotated[list[AnyMessage], add_messages] = field(default_factory=list)
 
 
 @dataclass
 class InterviewState(State):
     """State for the interview process between editors and experts."""
 
-    editors: List[Editor] = field(default_factory=list)
+    editors: list[Editor] = field(default_factory=list)
     current_editor_index: int = field(default=0)
+    interviews: list[Annotated[list[AnyMessage], add_messages]] = field(
+        default_factory=list
+    )
     is_complete: bool = field(default=False)

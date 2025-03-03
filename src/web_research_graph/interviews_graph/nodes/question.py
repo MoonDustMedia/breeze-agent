@@ -23,12 +23,15 @@ async def generate_question(
         )
 
     editor_name = sanitize_name(editor.name)
-    swapped = swap_roles(state, editor_name)
+    interviews = list(state.interviews)
+    interview = interviews[state.current_editor_index]
+    swapped = swap_roles(interview, editor_name)
 
     chain = (INTERVIEW_QUESTION_PROMPT | model).with_config(config)
 
     result = await chain.ainvoke({"messages": swapped, "persona": editor.persona})
 
     content = result.content if hasattr(result, "content") else str(result)
+    interview.append(AIMessage(content=content, name=editor_name))
 
-    return {"messages": AIMessage(content=content, name=editor_name)}  # type: ignore
+    return {"interviews": interviews}  # type: ignore
