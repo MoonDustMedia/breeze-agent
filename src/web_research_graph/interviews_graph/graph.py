@@ -1,6 +1,6 @@
 """Define the interview workflow graph."""
 
-from langgraph.graph import END, START, StateGraph
+from langgraph.graph import END, StateGraph
 from langgraph.pregel import RetryPolicy
 
 from web_research_graph.interviews_graph.answers_graph.graph import answer_graph
@@ -12,6 +12,11 @@ from web_research_graph.state import InterviewState
 
 builder = StateGraph(InterviewState)
 
+# FIXME:
+# - each interview should have its own dialogue history
+# - all interview dialogues should be accessible for the next step
+# - in the paper, they are not including the interview history for the expert to answer; though it is reasonable to provide it.
+
 # Add nodes
 builder.add_node("initialize", initialize_interview)
 builder.add_node("ask_question", generate_question, retry=RetryPolicy(max_attempts=5))
@@ -19,7 +24,7 @@ builder.add_node("answer_question", answer_graph, retry=RetryPolicy(max_attempts
 builder.add_node("next_editor", next_editor)
 
 # Add edges
-builder.add_edge(START, "initialize")
+builder.set_entry_point("initialize")
 builder.add_edge("initialize", "ask_question")
 builder.add_conditional_edges(
     "answer_question",

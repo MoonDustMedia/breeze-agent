@@ -101,9 +101,7 @@ class Outline(BaseModel):
 class InputState:
     """Defines the input state for the agent."""
 
-    messages: Annotated[Sequence[AnyMessage], add_messages] = field(
-        default_factory=list
-    )
+    input: Optional[str] = field(default=None)
 
 
 @dataclass
@@ -136,23 +134,23 @@ def default_topic_validation() -> TopicValidation:
 class State(InputState, OutputState):
     """Represents the complete state of the agent."""
 
+    topic: TopicValidation = field(default_factory=default_topic_validation)
+    related_topics: Optional[RelatedTopics] = field(default=None)
     is_last_step: IsLastStep = field(default=False)
     outline: Optional[Outline] = field(default=None)
-    related_topics: Optional[RelatedTopics] = field(default=None)
     perspectives: Optional[Perspectives] = field(default=None)
+    references: Optional[dict[str, str]] = Field(default=None)
     article: Optional[str] = field(default=None)
-    references: Annotated[Optional[dict[str, str]], field(default=None)] = None
-    topic: TopicValidation = field(default_factory=default_topic_validation)
+    interviews: Optional[dict[str, List[AnyMessage]]] = field(default=None)
+    messages: Annotated[Sequence[AnyMessage], add_messages] = field(
+        default_factory=list
+    )
 
 
 @dataclass
-class InterviewState:
+class InterviewState(State):
     """State for the interview process between editors and experts."""
 
-    messages: Annotated[List[AnyMessage], add_messages] = field(default_factory=list)
-    references: Annotated[Optional[dict[str, str]], field(default=None)] = None
-    editor: Annotated[Optional[Editor], field(default=None)] = None
     editors: List[Editor] = field(default_factory=list)
     current_editor_index: int = field(default=0)
     is_complete: bool = field(default=False)
-    perspectives: Optional[Perspectives] = field(default=None)

@@ -18,7 +18,8 @@ async def generate_expert_answer(
     configuration = Configuration.from_runnable_config(config)
     model = load_chat_model(configuration.fast_llm_model)
 
-    if state.editor is None:
+    editor = state.editors[state.current_editor_index]
+    if editor is None:
         raise ValueError("Editor not found in state")
 
     # Format references for the prompt
@@ -42,10 +43,6 @@ async def generate_expert_answer(
     if not content:
         return state
 
-    return InterviewState(
-        messages=state.messages + [AIMessage(content=content, name=EXPERT_NAME)],
-        references=state.references,
-        editor=state.editor,
-        editors=state.editors,
-        current_editor_index=state.current_editor_index,
-    )
+    return {
+        "messages": AIMessage(content=content, name=EXPERT_NAME),
+    }  # type: ignore

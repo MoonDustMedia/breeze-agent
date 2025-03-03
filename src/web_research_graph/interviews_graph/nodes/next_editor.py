@@ -13,14 +13,7 @@ async def next_editor(state: InterviewState, config: RunnableConfig) -> Intervie
     next_index = state.current_editor_index + 1
 
     if next_index >= len(state.editors):
-        return InterviewState(
-            messages=state.messages,
-            editor=state.editor,
-            references=state.references,
-            editors=state.editors,
-            current_editor_index=next_index,
-            is_complete=True,
-        )
+        return {"is_complete": True, "current_editor_index": next_index}  # type: ignore
 
     # Add a separator message to mark the start of a new conversation
     separator = AIMessage(
@@ -34,10 +27,7 @@ async def next_editor(state: InterviewState, config: RunnableConfig) -> Intervie
         name=EXPERT_NAME,
     )
 
-    return InterviewState(
-        messages=state.messages + [separator, initial_message],
-        editor=state.editors[next_index],
-        references=state.references,
-        editors=state.editors,
-        current_editor_index=next_index,
-    )
+    return {
+        "messages": [separator, initial_message],
+        "current_editor_index": next_index,
+    }  # type: ignore

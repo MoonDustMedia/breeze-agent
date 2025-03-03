@@ -23,9 +23,7 @@ def format_docs(docs: list[Document]) -> str:
     return "\n\n".join(format_doc(doc) for doc in docs)
 
 
-async def generate_perspectives(
-    state: State, config: RunnableConfig
-) -> dict[str, Perspectives]:
+async def generate_perspectives(state: State, config: RunnableConfig) -> State:
     """Generate diverse editorial perspectives based on related topics."""
     configuration = Configuration.from_runnable_config(config)
 
@@ -52,14 +50,6 @@ async def generate_perspectives(
 
     formatted_docs = format_docs(all_docs)
 
-    # Get the original topic from messages
-    last_user_message = next(
-        (msg for msg in reversed(state.messages) if msg.type == "human"),
-        None,
-    )
-    if not last_user_message:
-        raise ValueError("No user message found in state")
-
     # Initialize the model and create the chain
     model = load_chat_model(configuration.fast_llm_model)
     chain = (
@@ -68,7 +58,7 @@ async def generate_perspectives(
 
     # Generate perspectives
     perspectives = await chain.ainvoke(
-        {"examples": formatted_docs, "topic": last_user_message.content}
+        {"examples": formatted_docs, "topic": state.topic.topic}
     )
 
-    return {"perspectives": perspectives}
+    return {"perspectives": perspectives}  # type: ignore

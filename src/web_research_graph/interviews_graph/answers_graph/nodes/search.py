@@ -14,19 +14,16 @@ async def search_for_context(
     state: InterviewState, config: RunnableConfig
 ) -> InterviewState:
     """Search for relevant information to answer the question."""
-    if state.editor is None:
+    editor = state.editors[state.current_editor_index]
+    if editor is None:
         raise ValueError("Editor not found in state")
 
     # Swap roles to get the correct perspective
-    swapped_state = swap_roles(state, EXPERT_NAME)
+    swapped_messages = swap_roles(state, EXPERT_NAME)
 
     # Get the last question (now as HumanMessage after swap)
     last_question = next(
-        (
-            msg
-            for msg in reversed(swapped_state.messages)
-            if isinstance(msg, HumanMessage)
-        ),
+        (msg for msg in reversed(swapped_messages) if isinstance(msg, HumanMessage)),
         None,
     )
 
@@ -34,23 +31,19 @@ async def search_for_context(
         return state
 
     # Perform search
-    search_results = await search(last_question.content, config=config)
+    search_results = await search(str(last_question.content), config=config)
 
     # Store results in references
     if search_results:
-        references = state.references or {}
+        references = {}
         for result in search_results:
             if isinstance(result, dict):
                 references[result.get("link", "unknown")] = result.get("snippet", "")
             elif isinstance(result, str):
                 references[f"source_{len(references)}"] = result
 
-        return InterviewState(
-            messages=state.messages,
-            references=references,
-            editor=state.editor,
-            editors=state.editors,
-            current_editor_index=state.current_editor_index,
-        )
+        return {
+            "references": references,
+        }  # type: ignore
 
-    return state
+    return {}  # type: ignore

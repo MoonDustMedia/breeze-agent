@@ -3,12 +3,14 @@
 from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableConfig
 
-from web_research_graph.state import Editor, InterviewState, State
+from web_research_graph.state import Editor, InterviewState
 
 EXPERT_NAME = "expert"
 
 
-async def initialize_interview(state: State, config: RunnableConfig) -> InterviewState:
+def initialize_interview(
+    state: InterviewState, config: RunnableConfig
+) -> InterviewState:
     """Initialize the interview state with editors from perspectives."""
     # Get editors from perspectives
     if not state.perspectives:
@@ -29,10 +31,8 @@ async def initialize_interview(state: State, config: RunnableConfig) -> Intervie
         name=EXPERT_NAME,
     )
 
-    return InterviewState(
-        messages=[initial_message],
-        editor=editors_list[0],
-        references={},
-        editors=editors_list,
-        current_editor_index=0,
-    )
+    return {
+        "messages": initial_message,
+        "editors": editors_list,
+        "current_editor_index": 0,
+    }  # type: ignore

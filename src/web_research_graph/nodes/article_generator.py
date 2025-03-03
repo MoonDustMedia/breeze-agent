@@ -56,13 +56,15 @@ async def generate_section(
     )
 
     # Generate the section
-    return await chain.ainvoke(
+    result = await chain.ainvoke(
         {
             "outline": outline_str,
             "section": section_title,
             "docs": formatted_docs,
         }
     )
+    assert isinstance(result, Section), f"Unexpected return type: {type(result)}"
+    return result
 
 
 async def generate_article(
@@ -102,9 +104,7 @@ async def generate_article(
     chain = (ARTICLE_WRITER_PROMPT | model | StrOutputParser()).with_config(config)
 
     # Generate the final article
-    final_article = await chain.ainvoke(
-        {"draft": draft, "topic": current_outline.page_title}
-    )
+    final_article = await chain.ainvoke({"draft": draft, "topic": state.topic.topic})
 
     # Update state with the generated article
     return State(

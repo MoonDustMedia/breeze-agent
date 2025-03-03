@@ -5,7 +5,7 @@ from typing import Any, Dict, Optional
 
 from langchain.chat_models import init_chat_model
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langchain_core.messages import AIMessage, AnyMessage, BaseMessage, HumanMessage
 
 from web_research_graph.state import InterviewState, Section, Subsection
 
@@ -64,19 +64,12 @@ def sanitize_name(name: str) -> str:
     return sanitized
 
 
-def swap_roles(state: InterviewState, name: str) -> InterviewState:
+def swap_roles(state: InterviewState, name: str) -> list[AnyMessage]:
     """Convert messages to appropriate roles for the current speaker."""
-    converted = []
+    swapped = []
     for i, message in enumerate(state.messages):
         if isinstance(message, AIMessage) and message.name != name:
             message = HumanMessage(**message.dict(exclude={"type"}))
+        swapped.append(message)
 
-        converted.append(message)
-
-    return InterviewState(
-        messages=converted,
-        editor=state.editor,
-        references=state.references,
-        editors=state.editors,
-        current_editor_index=state.current_editor_index,
-    )
+    return swapped

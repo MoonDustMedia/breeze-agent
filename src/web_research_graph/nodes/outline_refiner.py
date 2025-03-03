@@ -35,7 +35,7 @@ async def refine_outline(
     # Generate refined outline with explicit structure validation
     refined_outline = await chain.ainvoke(
         {
-            "topic": current_outline.page_title,
+            "topic": state.topic.topic,
             "old_outline": current_outline.as_str,
             "conversations": conversations,
         }
@@ -54,10 +54,6 @@ async def refine_outline(
         refined_outline.sections = list(existing_sections.values())
 
     # Return updated state with new outline
-    return State(
-        messages=state.messages,
-        outline=refined_outline,
-        related_topics=state.related_topics,
-        perspectives=state.perspectives,
-        is_last_step=state.is_last_step,
-    )
+    return {
+        "outline": refined_outline,
+    }  # type: ignore

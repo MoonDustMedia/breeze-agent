@@ -9,13 +9,15 @@ MAX_TURNS = 3
 EXPERT_NAME = "expert"
 
 
+# FIXME: this never ends the interview. My guess is something related to the swap roles and name.
 def route_messages(state: InterviewState) -> str:
     """Determine whether to continue the interview or end it."""
     if not state.messages:
         return "end"
 
     messages = state.messages
-    current_editor_name = sanitize_name(state.editor.name)
+    editor = state.editors[state.current_editor_index]
+    current_editor_name = sanitize_name(editor.name)
 
     # Find where the current editor's conversation started
     conversation_start = 0

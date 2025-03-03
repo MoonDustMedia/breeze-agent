@@ -1,8 +1,5 @@
 """Node for generating Wikipedia-style outlines."""
 
-from typing import Dict, List
-
-from langchain_core.messages import AIMessage
 from langchain_core.runnables import RunnableConfig
 
 from web_research_graph.configuration import Configuration
@@ -11,9 +8,7 @@ from web_research_graph.state import Outline, State
 from web_research_graph.utils import load_chat_model
 
 
-async def generate_outline(
-    state: State, config: RunnableConfig
-) -> Dict[str, List[AIMessage]]:
+async def generate_outline(state: State, config: RunnableConfig) -> State:
     """Generate a Wikipedia-style outline for a given topic."""
     configuration = Configuration.from_runnable_config(config)
     model = load_chat_model(configuration.tool_model)
@@ -30,4 +25,4 @@ async def generate_outline(
 
     return {
         "outline": response,
-    }
+    }  # type: ignore
