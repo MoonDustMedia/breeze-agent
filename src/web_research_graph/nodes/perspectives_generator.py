@@ -14,7 +14,8 @@ from web_research_graph.utils import load_chat_model
 
 def format_doc(doc: Document, max_length: int = 1000) -> str:
     """Format a Wikipedia document for use in prompts."""
-    related = ", ".join(random.sample(doc.metadata["related_titles"], 10))
+    all_related = doc.metadata.get("related_titles", [])
+    related = ", ".join(random.sample(all_related, min(10, len(all_related))))
     return f"### {doc.metadata['title']}\n- Summary: {doc.page_content[: int(max_length * 2 / 3)]}\n\n- Related: {related[: int(max_length / 3)]}"
 
 
