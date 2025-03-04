@@ -10,13 +10,8 @@ TOPIC_VALIDATOR_PROMPT = ChatPromptTemplate.from_messages(
     [
         (
             "system",
-            """You are a helpful assistant whose job is to ensure the user provides a clear topic for research.
+            """You are a helpful assistant whose job is to ensure the user provides a clear topic to research.
         Analyze the user's input and determine if it contains a clear research topic.
-        
-        Example valid topics:
-        - "Artificial Intelligence"
-        - "The French Revolution"
-        - "Quantum Computing"
         
         Return a structured response with:
         - is_valid: true if a clear topic is provided, false otherwise
