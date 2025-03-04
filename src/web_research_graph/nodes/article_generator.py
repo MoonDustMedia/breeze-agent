@@ -7,7 +7,7 @@ from langchain_core.documents import Document
 from langchain_core.output_parsers import StrOutputParser
 from langchain_core.runnables import RunnableConfig
 from langchain_core.vectorstores import VectorStoreRetriever
-from langchain_openai import OpenAIEmbeddings
+from langchain_ollama import OllamaEmbeddings
 
 from web_research_graph.configuration import Configuration
 from web_research_graph.prompts import ARTICLE_WRITER_PROMPT, SECTION_WRITER_PROMPT
@@ -19,7 +19,7 @@ async def create_retriever(
     references: Optional[dict[str, str]],
 ) -> VectorStoreRetriever:
     """Create a retriever from the reference documents."""
-    embeddings = OpenAIEmbeddings(model="text-embedding-3-small")
+    embeddings = OllamaEmbeddings(model="mxbai-embed-large")
     reference_docs = [
         Document(page_content=content, metadata={"source": source})
         for source, content in references.items()
@@ -78,7 +78,7 @@ async def generate_article(
     current_outline = state.outline
 
     # Create retriever from references in state
-    retriever = await create_retriever(state.references)
+    retriever = (await create_retriever(state.references)).with_config(config)
 
     # Generate each section in parallel
     sections = []
@@ -107,12 +107,7 @@ async def generate_article(
     final_article = await chain.ainvoke({"draft": draft, "topic": state.topic.topic})
 
     # Update state with the generated article
-    return State(
-        messages=state.messages,
-        outline=current_outline,
-        related_topics=state.related_topics,
-        perspectives=state.perspectives,
-        is_last_step=True,
-        article=final_article,
-        references=state.references,
-    )
+    return {
+        "article": final_article,
+        "is_last_step": True,
+    } # type: ignore
