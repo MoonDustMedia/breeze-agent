@@ -35,9 +35,7 @@ async def generate_expert_answer(
     chain = (INTERVIEW_ANSWER_PROMPT | model).with_config(config)
 
     # Generate answer
-    result = await chain.ainvoke(
-        {"messages": messages, "references": references_text}
-    )
+    result = await chain.ainvoke({"messages": messages, "references": references_text})
 
     content = result.content if hasattr(result, "content") else str(result)
 

@@ -1,6 +1,6 @@
 """Node for generating the full Wikipedia article."""
 
-from typing import Optional
+from typing import Optional, cast
 
 from langchain_community.vectorstores import InMemoryVectorStore
 from langchain_core.documents import Document
@@ -24,6 +24,7 @@ async def create_retriever(
         Document(page_content=content, metadata={"source": source})
         for source, content in references.items()
     ]
+
     vectorstore = InMemoryVectorStore.from_documents(
         reference_docs,
         embedding=embeddings,
@@ -78,7 +79,10 @@ async def generate_article(
     current_outline = state.outline
 
     # Create retriever from references in state
-    retriever = (await create_retriever(state.references)).with_config(config)
+    retriever = cast(
+        VectorStoreRetriever,
+        (await create_retriever(state.references)).with_config(config),
+    )
 
     # Generate each section in parallel
     sections = []
@@ -110,4 +114,4 @@ async def generate_article(
     return {
         "article": final_article,
         "is_last_step": True,
-    } # type: ignore
+    }  # type: ignore

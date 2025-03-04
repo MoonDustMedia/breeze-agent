@@ -9,33 +9,15 @@ MAX_TURNS = 3
 EXPERT_NAME = "expert"
 
 
-# FIXME: this never ends the interview. My guess is something related to the swap roles and name.
 def route_messages(state: InterviewState) -> str:
     """Determine whether to continue the interview or end it."""
-    if not state.messages:
-        return "end"
-
-    messages = state.messages
     editor = state.editors[state.current_editor_index]
     current_editor_name = sanitize_name(editor.name)
 
-    # Find where the current editor's conversation started
-    conversation_start = 0
-    for i, m in enumerate(messages):
-        if (
-            isinstance(m, AIMessage)
-            and m.name == "system"
-            and current_editor_name in m.content
-        ):
-            conversation_start = i
-            break
-
-    # Only look at messages after the conversation start
-    current_messages = messages[conversation_start:]
-
+    messages = state.interviews[state.current_editor_index]
     # Get the last message
-    if current_messages:
-        last_message = current_messages[-1]
+    if messages:
+        last_message = messages[-1]
 
         # If the last message was from the expert, wait for editor's response
         if isinstance(last_message, AIMessage) and last_message.name == EXPERT_NAME:
@@ -50,7 +32,7 @@ def route_messages(state: InterviewState) -> str:
             expert_responses = len(
                 [
                     m
-                    for m in current_messages
+                    for m in messages
                     if isinstance(m, AIMessage) and m.name == EXPERT_NAME
                 ]
             )

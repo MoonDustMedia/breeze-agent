@@ -130,6 +130,12 @@ def default_topic_validation() -> TopicValidation:
     return TopicValidation(is_valid=False, topic=None, message=None)
 
 
+# Custom reducer function to merge dictionaries
+def merge_dicts(existing: dict[str, str], new: dict[str, str]) -> dict[str, str]:
+    """Merge two dictionaries, with new keys overriding old keys."""
+    return {**existing, **new}
+
+
 @dataclass
 class State(InputState, OutputState):
     """Represents the complete state of the agent."""
@@ -139,7 +145,7 @@ class State(InputState, OutputState):
     is_last_step: IsLastStep = field(default=False)
     outline: Optional[Outline] = field(default=None)
     perspectives: Optional[Perspectives] = field(default=None)
-    references: dict[str, str] = field(default_factory=dict)
+    references: Annotated[dict[str, str], merge_dicts] = field(default_factory=dict)
     article: Optional[str] = field(default=None)
     interviews: list[Annotated[list[AnyMessage], add_messages]] = field(
         default_factory=list
